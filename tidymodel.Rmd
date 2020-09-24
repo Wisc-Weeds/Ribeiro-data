@@ -1,0 +1,148 @@
+---
+title: "test"
+author: "Maxwel Coura Oliveira"
+date: "6/29/2020"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(purrr)
+library(kableExtra)
+```
+
+
+
+```{r}
+Data = read.csv("Soil1.csv")
+glimpse(Data)
+```
+
+
+```{r}
+data <- Data %>% 
+  filter(trt != "check") %>% 
+   mutate_if(is.character, as.factor) %>% 
+  na.omit()
+```
+
+```{r}
+ggplot(data) + aes(y=biopercent, x=GDD) + geom_smooth(method="lm") + geom_point(alpha=0.1) +
+  facet_grid(spec~trt)
+```
+
+```{r}
+lm_mod <- 
+  linear_reg() %>% 
+  set_engine("lm")
+```
+
+
+```{r}
+lm_fit <- 
+  lm_mod %>% 
+  fit(biopercent ~ GDD * spec * trt, data = data)
+
+tidy(lm_fit)
+```
+
+
+```{r}
+# Here you select the GDD you want. For instance, if you want to see the residual at the end season, you add GDD>1000
+new_points <- expand.grid(GDD = 900, 
+                          trt = c("clas", "dual", "first", "out", "purs", "sharp", "spart", "tric", "valor", "war", "zid"), spec= c("fox", "pal", "rad", "rye"))
+new_points
+```
+
+```{r}
+#Getting predited values
+mean_pred <- predict(lm_fit, new_data = new_points)
+mean_pred
+```
+
+```{r}
+#Getting conf intervals
+conf_int_pred <- predict(lm_fit, 
+                         new_data = new_points, 
+                         type = "conf_int")
+conf_int_pred
+```
+
+
+
+
+```{r}
+# Plotting biomass (% untreated) at GDD = 1000 (your choice)
+plot_data900 <- 
+  new_points %>% 
+  bind_cols(mean_pred) %>% 
+  bind_cols(conf_int_pred)
+
+# and plot:
+ggplot(plot_data, aes(x = trt)) + facet_grid(~spec) +
+  geom_point(aes(y = .pred)) + coord_flip() +
+  geom_errorbar(aes(ymin = .pred_lower, 
+                    ymax = .pred_upper),
+                width = .2) + 
+  labs(y = "Biomass (% of untreated)")
+```
+
+```{r}
+new_data <- rbind(plot_data100, plot_data500, plot_data900) %>% 
+  mutate(trt = factor(trt, levels = c("clas", "first", "purs", "tric", "spart",  "valor", "sharp", "out", "dual", "war", "zid"), labels =c("clas", "first", "purs", "tric", "spart",  "valor", "sharp", "out", "dual", "war", "zid")))  %>% 
+  mutate(GDD = factor(GDD, levels = c("100", "500", "900"), labels = c("Early-season", "Mid-season", "End-season")))
+  
+ggplot(new_data, aes(x = GDD)) + facet_grid(trt ~ spec) + 
+  geom_point(aes(y = .pred)) + coord_flip() + theme_bw() +
+  geom_errorbar(aes(ymin = .pred_lower, 
+                    ymax = .pred_upper),
+                width = .2) + theme(panel.grid = element_blank()) +
+  labs(y = "Biomass (% of untreated)") +
+  ggsave("Figure 6.pdf", height = 12, width = 6, dpi=600)
+```
+
+
+#Optimazing your model fit
+
+```{r}
+# Nesting data
+nested_data <- data %>% 
+  group_by(trt, spec) %>% 
+  nest()
+
+nested_data
+```
+
+```{r}
+# Fitting linear models
+nested_models <- nested_data %>% 
+  mutate(model = map(data, ~ lm(biopercent ~ GDD, data = .x))) 
+nested_models
+```
+
+```{r}
+# Display estimated parameters, associated statistics, confidence intervals
+nested_models %>% 
+  mutate(coefs = map(model, tidy, conf.int = TRUE)) %>% 
+  unnest(coefs)
+```
+
+```{r}
+# Extracting R squared statistic for each model
+nested_models %>% 
+  mutate(metrics = map(model, glance)) %>% 
+  unnest(metrics) %>% 
+  select(trt:r.squared) %>% 
+  arrange(desc(r.squared)) # Arranging by "best" R squared
+```
+
+
+
+
+
+
+
+`
+
+
