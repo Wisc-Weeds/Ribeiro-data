@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(tidymodels)
 library(purrr)
+library(ggtext)
 library(kableExtra)
 library(tidytext)
 ```
@@ -74,7 +75,7 @@ tidy(lm_fit)
 
 ```{r}
 # Here you select the GDD you want. For instance, if you want to see the residual at the end season, you add GDD>1000
-new_points <- expand.grid(GDD = 100, 
+new_points <- expand.grid(GDD = 900, 
                           trt = c("clas", "dual", "first", "out", "purs", "sharp", "spart", "tric", "valor", "war", "zid"), spec= c("fox", "pal", "rad", "rye"))
 new_points
 ```
@@ -98,7 +99,7 @@ conf_int_pred
 
 ```{r}
 # Plotting biomass (% untreated) at GDD = 1000 (your choice)
-plot_data100 <- 
+plot_data900 <- 
   new_points %>% 
   bind_cols(mean_pred) %>% 
   bind_cols(conf_int_pred)
@@ -127,15 +128,15 @@ new_data <- rbind(plot_data100, plot_data500, plot_data900) %>%
                           "Acetochlor (15)" = "war", 
                           "Pyroxasulfone (15)" = "zid")) %>% 
   mutate(species = fct_recode(spec,
-                               "giant foxtail" = "fox",
+                               "Giant foxtail" = "fox",
                                "Palmer amaranth" = "pal",
                                "Radish" = "rad",
                                "Cereal rye" = "rye")) %>% 
   mutate(GDD = as.factor(GDD), 
          GDD = fct_recode(GDD,
-                          "GDD = 100" = "100",
-                          "GDD = 500" = "500",
-                          "GDD = 900" = "900"
+                          "100 GDD" = "100",
+                          "500 GDD" = "500",
+                          "900 GDD" = "900"
          )) %>% 
   group_by(spec, GDD) %>% 
   mutate(GDD = as.factor(GDD),
@@ -173,7 +174,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 
 ```{r}
 p2 <- new_data %>% 
-  filter(species == "giant foxtail") %>% 
+  filter(species == "Giant foxtail") %>% 
   group_by(spec, GDD) %>% 
   mutate(GDD = as.factor(GDD),
            trt = reorder_within(trt, by = .pred, within = GDD)) %>% 
@@ -204,7 +205,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 ```{r}
 library(patchwork)
 
-weeds <-  p2 + p1 +
+weeds <-  p1 + p2 +
   ggsave("test.png")
 ```
 
@@ -267,7 +268,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 
 
 ```{r}
-crops <-  p4 + p3 +
+crops <-  p3 + p4 +
   ggsave("test1.png")
 ```
 
@@ -276,7 +277,8 @@ crops <-  p4 + p3 +
 
 ```{r}
 (weeds | crops) +
-  ggsave("Figura_2.pdf", width = 15, height = 6, dpi = 600)
+   plot_annotation(tag_levels = 'A') +
+  ggsave("Figura_3.pdf", width = 15, height = 6, dpi = 600)
 ```
 
 
