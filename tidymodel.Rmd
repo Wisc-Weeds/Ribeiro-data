@@ -41,11 +41,6 @@ sum(is.na(data))
 
 
 ```{r}
-map(data, ~sum(is.na(.)))
-```
-
-
-```{r}
 data <- Data2 %>% 
   filter(trt != "check") %>% 
    mutate_if(is.character, as.factor) #%>% 
@@ -75,7 +70,7 @@ tidy(lm_fit)
 
 ```{r}
 # Here you select the GDD you want. For instance, if you want to see the residual at the end season, you add GDD>1000
-new_points <- expand.grid(GDD = 900, 
+new_points <- expand.grid(GDD = c(100, 500, 900), 
                           trt = c("clas", "dual", "first", "out", "purs", "sharp", "spart", "tric", "valor", "war", "zid"), spec= c("fox", "pal", "rad", "rye"))
 new_points
 ```
@@ -99,7 +94,7 @@ conf_int_pred
 
 ```{r}
 # Plotting biomass (% untreated) at GDD = 1000 (your choice)
-plot_data900 <- 
+plot_data <- 
   new_points %>% 
   bind_cols(mean_pred) %>% 
   bind_cols(conf_int_pred)
@@ -114,7 +109,7 @@ ggplot(plot_data, aes(x = fct_reorder(trt, .pred))) + facet_grid(~spec) +
 ```
 
 ```{r}
-new_data <- rbind(plot_data100, plot_data500, plot_data900) %>% 
+new_data <- plot_data %>% 
   mutate(trt = fct_recode(trt,
                           "Chlorimuron-ethyl (2)" = "clas", 
                           "Cloransulam-methyl (2)" = "first", 
@@ -153,7 +148,9 @@ p1 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) + 
   scale_x_reordered() +
-  scale_color_continuous(low = "red", high = "limegreen") +
+  scale_color_gradient(name = "", low = "red", high = "limegreen",
+                       limits = c(0, 100), breaks=c(0, 50 ,100),
+                       labels= c("High injury", "", "Low injury")) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
@@ -162,7 +159,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
   labs(x= "", y = "Biomass (% nontreated control)") + 
-  theme(legend.position = "none",
+  theme(legend.position = "bottom",
         strip.text = element_text(face = "bold", color = "black",
                                   size = 12),
         strip.text.y = element_text(face = "bold", color = "grey30",
@@ -181,7 +178,9 @@ p2 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) + 
   scale_x_reordered() +
-  scale_color_continuous(low = "red", high = "limegreen") +
+  scale_color_gradient(name = "", low = "red", high = "limegreen",
+                       limits = c(0, 100), breaks=c(0, 50 ,100),
+                       labels= c("High injury", "", "Low injury")) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
@@ -190,7 +189,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
   labs(x= "", y = "Biomass (% nontreated control)") + 
-  theme(legend.position = "none",
+  theme(legend.position = "bottom",
         strip.text = element_text(face = "bold", color = "black",
                                   size = 12),
         strip.text.y = element_text(face = "bold", color = "grey30",
@@ -202,12 +201,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 
 
 
-```{r}
-library(patchwork)
 
-weeds <-  p1 + p2 +
-  ggsave("test.png")
-```
 
 
 ```{r}
@@ -216,10 +210,19 @@ p3 <- new_data %>%
   group_by(spec, GDD) %>% 
   mutate(GDD = as.factor(GDD),
            trt = reorder_within(trt, by = .pred, within = GDD)) %>% 
+  mutate(.pred = if_else(.pred >= 100, 100, .pred)) %>% 
+  mutate(.pred_lower = case_when(
+    .pred == 100.00000 ~  91.23024,
+    TRUE                    ~ .pred_lower)) %>% 
+  mutate(.pred_upper = case_when(
+    .pred == 100.00000 ~  108.5829,
+    TRUE                    ~ .pred_upper)) %>% 
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) +  
   scale_x_reordered() +
-  scale_color_continuous(low = "red", high = "limegreen") +
+  scale_color_gradient(name = "", low = "red", high = "limegreen",
+                       limits = c(0, 100), breaks=c(0, 50 ,100),
+                       labels= c("High injury", "", "Low injury")) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
@@ -228,7 +231,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
   labs(x= "", y = "Biomass (% nontreated control)") + 
-  theme(legend.position = "none",
+  theme(legend.position = "bottom",
         strip.text = element_text(face = "bold", color = "black",
                                   size = 12),
         strip.text.y = element_text(face = "bold", color = "grey30",
@@ -247,7 +250,9 @@ p4 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) + 
   scale_x_reordered() +
-  scale_color_continuous(low = "red", high = "limegreen") +
+  scale_color_gradient(name = "", low = "red", high = "limegreen",
+                       limits = c(0, 100), breaks=c(0, 50 ,100),
+                       labels= c("High injury", "", "Low injury")) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
@@ -256,7 +261,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
   labs(x= "", y = "Biomass (% nontreated control)") + 
-  theme(legend.position = "none",
+  theme(legend.position = "bottom", 
         strip.text = element_text(face = "bold", color = "black",
                                   size = 12),
         strip.text.y = element_text(face = "bold", color = "grey30",
@@ -268,18 +273,27 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 
 
 ```{r}
-crops <-  p3 + p4 +
-  ggsave("test1.png")
+library(ggpubr)
+ggarrange(p1, p2, p3, p4, nrow=1, common.legend = TRUE, legend="bottom")
 ```
-
 
 
 
 ```{r}
-(weeds | crops) +
-   plot_annotation(tag_levels = 'A') +
-  ggsave("Figura_3.pdf", width = 15, height = 6, dpi = 600)
+f3 <- p1 | p2 | p3 | p4 +
+  plot_annotation(tag_levels = 'A') &
+  plot_layout(guides = "collect") & theme(legend.position = 'bottom') & 
+  scale_colour_continuous(limits = c(0, 100))
+  ggsave("Figura_3.pdf", width = 15, height = 7, dpi = 600, f3)
 ```
+
+
+
+
+
+
+
+
 
 
 
