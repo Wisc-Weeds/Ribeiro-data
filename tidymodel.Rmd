@@ -154,7 +154,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
-  scale_y_continuous(limits = c(-2,118), breaks = c(0 ,25, 50, 75, 100)) +
+  scale_y_continuous(limits = c(-2,110), breaks = c(0 ,25, 50, 75, 100)) +
   geom_errorbar(aes(ymin = .pred_lower, 
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
@@ -168,6 +168,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
         strip.background = element_rect(fill = "grey90")) +
   ggsave("Figure 6.pdf", width = 4, height = 6, dpi=600)
 ```
+
 
 ```{r}
 p2 <- new_data %>% 
@@ -184,7 +185,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
-  scale_y_continuous(limits = c(-2,118), breaks = c(0 ,25, 50, 75, 100)) +
+  scale_y_continuous(limits = c(-2,110), breaks = c(0 ,25, 50, 75, 100)) +
   geom_errorbar(aes(ymin = .pred_lower, 
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
@@ -226,7 +227,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
-  scale_y_continuous(limits = c(-2,118), breaks = c(0 ,25, 50, 75, 100)) +
+  scale_y_continuous(limits = c(-2,110), breaks = c(0 ,25, 50, 75, 100)) +
   geom_errorbar(aes(ymin = .pred_lower, 
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
@@ -256,7 +257,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
   facet_grid(GDD ~ species, scales = "free") + 
   coord_flip() + 
   theme_bw() +
-  scale_y_continuous(limits = c(-2,118), breaks = c(0 ,25, 50, 75, 100)) +
+  scale_y_continuous(limits = c(-2,110), breaks = c(0 ,25, 50, 75, 100)) +
   geom_errorbar(aes(ymin = .pred_lower, 
                     ymax = .pred_upper),
                 width = .2) + theme(panel.grid = element_blank()) +
@@ -274,7 +275,8 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 
 ```{r}
 library(ggpubr)
-ggarrange(p1, p2, p3, p4, nrow=1, common.legend = TRUE, legend="bottom")
+ggarrange(p1, p2, p3, p4, nrow=1, common.legend = TRUE, legend="bottom") +
+  ggsave("Figura_3.pdf", width = 15, height = 7, dpi = 600)
 ```
 
 
