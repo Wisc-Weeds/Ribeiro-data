@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 ```{r include=FALSE}
 library(tidyverse)
 library(tidymodels)
-library(purrr)
 library(ggtext)
 library(kableExtra)
 library(tidytext)
@@ -152,7 +151,7 @@ p1 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) + 
   scale_x_reordered() +
-  scale_color_gradient(name = "", low = "red", high = "limegreen",
+  scale_color_gradient(name = "", low = "#0A284B", high = "#6FDE6E",
                        limits = c(0, 100), breaks=c(0, 50 ,100),
                        labels= c("0% Biomass", "", "100% Biomass")) +
   facet_grid(GDD ~ species, scales = "free") + 
@@ -186,7 +185,7 @@ p2 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) + 
   scale_x_reordered() +
-  scale_color_gradient(name = "", low = "red", high = "limegreen",
+  scale_color_gradient(name = "", low = "#0A284B", high = "#6FDE6E",
                        limits = c(0, 100), breaks=c(0, 50 ,100),
                        labels= c("0% Biomass", "", "100% Biomass")) +
   facet_grid(GDD ~ species, scales = "free") + 
@@ -231,7 +230,7 @@ p3 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) +  
   scale_x_reordered() +
-  scale_color_gradient(name = "", low = "red", high = "limegreen",
+  scale_color_gradient(name = "", low = "#0A284B", high = "#6FDE6E",
                        limits = c(0, 100), breaks=c(0, 50 ,100),
                        labels= c("0% Biomass", "", "100% Biomass")) +
   facet_grid(GDD ~ species, scales = "free") + 
@@ -265,7 +264,7 @@ p4 <- new_data %>%
 ggplot(aes(x = trt, y = .pred, color = .pred)) + 
   geom_point(size = 2, stroke= 1) + 
   scale_x_reordered() +
-  scale_color_gradient(name = "", low = "red", high = "limegreen",
+  scale_color_gradient(name = "", low = "#0A284B", high = "#6FDE6E",
                        limits = c(0, 100), breaks=c(0, 50 ,100),
                        labels= c("0% Biomass", "", "100% Biomass")) +
   facet_grid(GDD ~ species, scales = "free") + 
@@ -293,7 +292,7 @@ ggplot(aes(x = trt, y = .pred, color = .pred)) +
 ```{r}
 library(ggpubr)
 ggarrange(p1, p2, p3, p4, nrow=1, common.legend = TRUE, legend="bottom") +
-  ggsave("Figura_3.pdf", width = 15, height = 7, dpi = 600)
+  ggsave("Figura_3.pdf", width = 15, height = 7, dpi = 300, device = cairo_pdf)
 ```
 
 
