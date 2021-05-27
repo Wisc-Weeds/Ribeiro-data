@@ -2,4 +2,4 @@
 Data project from Victor Ribeiro from Wisconsin 
 
 
-![Residual](/Figura_3.png)
+![Residual](/Figura_3.png) 
