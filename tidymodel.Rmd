@@ -2,7 +2,7 @@
 title: "paper analysis"
 author: "Maxwel Coura Oliveira"
 date: "6/29/2020" 
-output: html_document
+output: html_document 
 ---
 
 ```{r setup}
